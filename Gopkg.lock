@@ -2,180 +2,255 @@
 
 
 [[projects]]
+  digest = "1:0e3c30694c9f3c284136c22a733cd119f6d7144a1e436eadfd1e5b9cdbeeefdf"
   name = "github.com/Financial-Times/go-fthealth"
   packages = ["v1_1"]
+  pruneopts = "UT"
   revision = "1b007e2b37b7936dfb6671fa17e5a29fd35a08ea"
   version = "0.4.0"
 
 [[projects]]
+  digest = "1:92da547d0414ad8a3f1a405503ee9b103cb87f5beabc52ef907f712f2ee1caf2"
   name = "github.com/Financial-Times/http-handlers-go"
   packages = ["httphandlers"]
+  pruneopts = "UT"
   revision = "229ac16f1d9ec9bca485d2dafb9ec14dc7e9ba24"
   version = "0.1.1"
 
 [[projects]]
+  digest = "1:ed8e47beeabc393a1f9bf7964ccf612fca8a7ba68ec665507cf8404bd12baac6"
   name = "github.com/Financial-Times/kafka-client-go"
   packages = ["kafka"]
+  pruneopts = "UT"
   revision = "cc65f68255d42de893a6d72f31394ad031c54142"
   version = "0.4.0"
 
 [[projects]]
+  digest = "1:79842a99b682a84375be78f0c6ba316d784eb347f8db2354c3a68fee39a497da"
   name = "github.com/Financial-Times/service-status-go"
   packages = [
     "buildinfo",
     "gtg",
-    "httphandlers"
+    "httphandlers",
   ]
+  pruneopts = "UT"
   revision = "3f5199736a3d7ae52394c63aac36834786825e21"
   version = "0.1.0"
 
 [[projects]]
+  digest = "1:38212fc0030b89d7be55aaf67bb91b273a4a14a026a3cee24b5e832ffe7e56ff"
   name = "github.com/Financial-Times/transactionid-utils-go"
   packages = ["."]
+  pruneopts = "UT"
   revision = "df2f00c734957c9dd651ce23ab0e0902504c7636"
   version = "v0.2.0"
 
 [[projects]]
+  digest = "1:ca070be9e5040d8e6dd4b9f2cabf0ecd27ef70b81aec86f573519544dd8bae04"
   name = "github.com/Shopify/sarama"
   packages = ["."]
+  pruneopts = "UT"
   revision = "ac03dfa0c99a940a48357980a4ebfafed5f23f9a"
 
 [[projects]]
+  digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
+  pruneopts = "UT"
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:1f0c7ab489b407a7f8f9ad16c25a504d28ab461517a971d341388a56156c1bd7"
   name = "github.com/eapache/go-resiliency"
   packages = ["breaker"]
+  pruneopts = "UT"
   revision = "b1fe83b5b03f624450823b751b662259ffc6af70"
 
 [[projects]]
   branch = "master"
+  digest = "1:2b55f08306f24f60dab51e006c1890db08d34ccc1b92c53a08a1a6e7792e3eb8"
   name = "github.com/eapache/go-xerial-snappy"
   packages = ["."]
+  pruneopts = "UT"
   revision = "bb955e01b9346ac19dc29eb16586c90ded99a98c"
 
 [[projects]]
+  digest = "1:444b82bfe35c83bbcaf84e310fb81a1f9ece03edfed586483c869e2c046aef69"
   name = "github.com/eapache/queue"
   packages = ["."]
+  pruneopts = "UT"
   revision = "44cc805cf13205b55f69e14bcb69867d1ae92f98"
   version = "v1.1.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:29a5ab9fa9e845fd8e8726f31b187d710afd271ef1eb32085fe3d604b7e06382"
   name = "github.com/golang/snappy"
   packages = ["."]
+  pruneopts = "UT"
   revision = "553a641470496b2327abcac10b36396bd98e45c9"
 
 [[projects]]
   branch = "master"
+  digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
   name = "github.com/gorilla/context"
   packages = ["."]
+  pruneopts = "UT"
   revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
 
 [[projects]]
+  digest = "1:4dd70d4e47ff713e8b6f904894fec98e51fe276307a570934d0f9061757e6bf5"
   name = "github.com/gorilla/handlers"
   packages = ["."]
+  pruneopts = "UT"
   revision = "a4043c62cc2329bacda331d33fc908ab11ef0ec3"
   version = "v1.2.1"
 
 [[projects]]
+  digest = "1:8f385a3ab2c952e4a887b193088cb43fbd3e5dd383ac40b395c3aadb2660f82b"
   name = "github.com/gorilla/mux"
   packages = ["."]
+  pruneopts = "UT"
   revision = "043ee6597c29786140136a5747b6a886364f5282"
 
 [[projects]]
+  digest = "1:826df03282c5a336f1d23a07ce0ec0a26c7230e1a5d5a79a8ea4b68c0c8462b3"
   name = "github.com/hashicorp/go-version"
   packages = ["."]
+  pruneopts = "UT"
   revision = "03c5bf6be031b6dd45afec16b1cf94fc8938bc77"
 
 [[projects]]
+  digest = "1:1d376b57cb42da216450c24bada332f2502ef9f2f7fa22b05bd2e0abe5b18308"
   name = "github.com/jawher/mow.cli"
   packages = ["."]
+  pruneopts = "UT"
   revision = "8327d12beb75e6471b7f045588acc318d1147146"
 
 [[projects]]
+  digest = "1:2e4e6a3041548dc5c9a82fb5986c445dff1d87631fcfec08aa0b798fdced9d0d"
   name = "github.com/joho/godotenv"
   packages = [
     ".",
-    "autoload"
+    "autoload",
   ]
+  pruneopts = "UT"
   revision = "325433c502d409f3c3dc820098fb0cfe38d98dc7"
 
 [[projects]]
+  digest = "1:34cd01be69526d7e73fff2eff67d8589b390d5f7dd6e1bf218c15f6f46ddc33a"
   name = "github.com/pierrec/lz4"
   packages = ["."]
+  pruneopts = "UT"
   revision = "5a3d2245f97fc249850e7802e3c01fad02a1c316"
 
 [[projects]]
+  digest = "1:186e021e0c2fa61e181151d8b2fef4d2b6b217a55794bd591de73773b934a32a"
   name = "github.com/pierrec/xxHash"
   packages = ["xxHash32"]
+  pruneopts = "UT"
   revision = "5a004441f897722c627870a981d02b29924215fa"
 
 [[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
+  pruneopts = "UT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:166d5400333156c32e5ae39062e75bf455882007797f45fdcf8079e6634489f6"
   name = "github.com/rcrowley/go-metrics"
   packages = ["."]
+  pruneopts = "UT"
   revision = "1f30fe9094a513ce4c700b9a54458bbb0c96996c"
 
 [[projects]]
+  digest = "1:142520cf3c9bb85449dd0000f820b8c604531587ee654793c54909be7dabadac"
   name = "github.com/samuel/go-zookeeper"
   packages = ["zk"]
+  pruneopts = "UT"
   revision = "1d7be4effb13d2d908342d349d71a284a7542693"
 
 [[projects]]
+  digest = "1:ce0654391d2c5af81261e8adad4af85c5a304a93982540ab94fb76ab304109ce"
   name = "github.com/sethgrid/pester"
   packages = ["."]
+  pruneopts = "UT"
   revision = "4f4c0a67b6496764028e1ab9fd8dfb630282ed2f"
 
 [[projects]]
+  digest = "1:fb011abd58a582cf867409273f372fc6437eda670ff02055c47e6203e90466d7"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
+  pruneopts = "UT"
   revision = "89742aefa4b206dcf400792f3bd35b542998eb3b"
 
 [[projects]]
+  digest = "1:8fea75655edc301b238cc7e8bfbc3a09b6fbc2f4ac353ce3ecf29449d407e5f1"
   name = "github.com/stretchr/testify"
   packages = ["assert"]
+  pruneopts = "UT"
   revision = "f6abca593680b2315d2075e0f5e2a9751e3f431a"
 
 [[projects]]
+  digest = "1:5a9d11d690bc73511a0f83e1b6ff860ee824389402a362f2d2d4be8a8e568fe3"
   name = "github.com/wvanbergen/kafka"
   packages = ["consumergroup"]
+  pruneopts = "UT"
   revision = "bc265fedb9ff5b5c5d3c0fdcef4a819b3523d3ee"
 
 [[projects]]
+  digest = "1:887bee472749022a9960abd12da96dfcc84b708efc6fbb1d34e0109208599ee0"
   name = "github.com/wvanbergen/kazoo-go"
   packages = ["."]
+  pruneopts = "UT"
   revision = "968957352185472eacb69215fa3dbfcfdbac1096"
 
 [[projects]]
+  digest = "1:624a05c7c6ed502bf77364cd3d54631383dafc169982fddd8ee77b53c3d9cccf"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
+  pruneopts = "UT"
   revision = "eb71ad9bd329b5ac0fd0148dd99bd62e8be8e035"
 
 [[projects]]
+  digest = "1:137a07d176f06db21c807d085339244f6a58ddac7d4f2fe5607a39392a2dcb5a"
   name = "golang.org/x/net"
   packages = ["context"]
+  pruneopts = "UT"
   revision = "3da985ce5951d99de868be4385f21ea6c2b22f24"
 
 [[projects]]
+  digest = "1:440999a0dde18af36177b1b484628e4554da68212b6e90fad915e28b9bee8b97"
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows"
+    "windows",
   ]
+  pruneopts = "UT"
   revision = "07c182904dbd53199946ba614a412c61d3c548f5"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5056af9254cbc41e0dd039fba676fe849fc886f9304379911c634c6374f64c9a"
+  input-imports = [
+    "github.com/Financial-Times/go-fthealth/v1_1",
+    "github.com/Financial-Times/http-handlers-go/httphandlers",
+    "github.com/Financial-Times/kafka-client-go/kafka",
+    "github.com/Financial-Times/service-status-go/gtg",
+    "github.com/Financial-Times/service-status-go/httphandlers",
+    "github.com/Financial-Times/transactionid-utils-go",
+    "github.com/gorilla/handlers",
+    "github.com/gorilla/mux",
+    "github.com/jawher/mow.cli",
+    "github.com/joho/godotenv/autoload",
+    "github.com/rcrowley/go-metrics",
+    "github.com/sethgrid/pester",
+    "github.com/sirupsen/logrus",
+    "github.com/stretchr/testify/assert",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

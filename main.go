@@ -90,7 +90,7 @@ func main() {
 
 	lvl, err := log.ParseLevel(*logLevel)
 	if err != nil {
-		log.Warnf("Log level %s could not be parsed, defaulting to info", logLevel)
+		log.Warnf("Log level %s could not be parsed, defaulting to info", *logLevel)
 		lvl = log.InfoLevel
 	}
 	log.SetLevel(lvl)

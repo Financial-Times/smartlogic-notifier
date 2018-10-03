@@ -65,7 +65,8 @@ func (svc *HealthService) smartlogicHealthCheck() fthealth.Check {
 }
 
 func (svc *HealthService) smartlogicCheck() (string, error) {
-	_, err := svc.notifier.GetConcept("healthcheck-concept")
+	// UUID for Financial Times org - if it stops existing we're screwed.
+	_, err := svc.notifier.GetConcept("b1a492d9-dcfe-43f8-8072-17b4618a78fd")
 	if err != nil {
 		return "Concept couldn't be retrieved.", err
 	}

@@ -240,7 +240,7 @@ func TestHealthCheckError(t *testing.T) {
 func TestHealthCheckCache(t *testing.T) {
 	changes := []string{}
 	concepts := map[string]string{
-		"healthcheck-concept": "1",
+		"b1a492d9-dcfe-43f8-8072-17b4618a78fd": "1",
 	}
 	mockSvc := NewMockService(concepts, changes, nil)
 	handler := NewNotifierHandler(mockSvc)
