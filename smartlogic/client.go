@@ -88,7 +88,7 @@ func (c *Client) GetConcept(uuid string) ([]byte, error) {
 func (c *Client) GetChangedConceptList(changeDate time.Time) ([]string, error) {
 	// path=tchmodel:FTSemanticPlayground/changes&since=2017-05-31T13:00:00.000Z&properties=[]
 	reqURL := c.baseURL
-	q := `path=tchmodel:` + c.model + `/changes&since=` + changeDate.Format("2006-01-02T15:04:05.000Z") + `&properties=[]`
+	q := `path=tchmodel:` + c.model + `/changes&since=` + changeDate.Format("2006-01-02T15:04:05.000Z") + `&properties=%5B%5D`
 	reqURL.RawQuery = q
 
 	log.Debugf("Smartlogic Change List Request URL: %v", reqURL.String())
@@ -217,5 +217,5 @@ func (c *Client) buildConceptPath(uuid string) string {
 	encodedConcept := url.QueryEscape(url.QueryEscape(concept))
 
 	encodedProperties := url.QueryEscape("<http://www.ft.com/ontology/shortLabel>")
-	return "model:" + c.model + "/" + encodedConcept + "&properties=[],skosxl:prefLabel/skosxl:literalForm,skosxl:altLabel/skosxl:literalForm," + encodedProperties + "/skosxl:literalForm"
+	return "model:" + c.model + "/" + encodedConcept + "&properties=%5B%5D,skosxl:prefLabel/skosxl:literalForm,skosxl:altLabel/skosxl:literalForm," + encodedProperties + "/skosxl:literalForm"
 }
