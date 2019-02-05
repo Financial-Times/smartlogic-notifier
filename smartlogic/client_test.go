@@ -200,7 +200,7 @@ func TestClient_GetChangedConceptList_Success(t *testing.T) {
 	response, err := sl.GetChangedConceptList(time.Now())
 	assert.NoError(t, err)
 
-	expectedResponse := []string{"/testTypeMetadata", "/fd55c1f0-6c5e-4869-aed4-6816836ffdb9"}
+	expectedResponse := []string{"testTypeMetadata", "fd55c1f0-6c5e-4869-aed4-6816836ffdb9"}
 
 	sort.Strings(expectedResponse)
 	sort.Strings(response)

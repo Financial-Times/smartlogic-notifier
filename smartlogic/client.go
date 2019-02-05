@@ -15,8 +15,8 @@ import (
 
 const slTokenURL = "https://cloud.smartlogic.com/token"
 const maxAccessFailureCount = 5
-const thingURIPrefix = "http://www.ft.com/thing"
-const managedLocationURIPrefix = "http://www.ft.com/ontology/managedlocation"
+const thingURIPrefix = "http://www.ft.com/thing/"
+const managedLocationURIPrefix = "http://www.ft.com/ontology/managedlocation/"
 
 type httpClient interface {
 	Do(req *http.Request) (resp *http.Response, err error)
