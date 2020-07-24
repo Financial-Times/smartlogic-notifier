@@ -28,13 +28,15 @@ type Handler struct {
 	notifier  Servicer
 	ticker    Ticker
 	requestCh chan notificationRequest
+	model     string
 }
 
-func NewNotifierHandler(notifier Servicer, opts ...func(*Handler)) *Handler {
+func NewNotifierHandler(notifier Servicer, smartlogicModel string, opts ...func(*Handler)) *Handler {
 	h := &Handler{
 		notifier:  notifier,
 		ticker:    &ticker{ticker: time.NewTicker(5 * time.Second)},
 		requestCh: make(chan notificationRequest, 1),
+		model:     smartlogicModel,
 	}
 
 	for _, opt := range opts {
@@ -62,11 +64,11 @@ func (h *Handler) HandleNotify(resp http.ResponseWriter, req *http.Request) {
 	vars := req.URL.Query()
 	var notSet []string
 	modifiedGraphId := vars.Get("modifiedGraphId")
-	if modifiedGraphId == "" {
+	if modifiedGraphId == "" || modifiedGraphId != h.model {
 		notSet = append(notSet, "modifiedGraphId")
 	}
 	affectedGraphId := vars.Get("affectedGraphId")
-	if affectedGraphId == "" {
+	if affectedGraphId == "" || affectedGraphId != h.model {
 		notSet = append(notSet, "affectedGraphId")
 	}
 	lastChangeDate := vars.Get("lastChangeDate")
@@ -75,7 +77,7 @@ func (h *Handler) HandleNotify(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	if len(notSet) > 0 {
-		writeJSONResponseMessage(resp, http.StatusBadRequest, responseData{Msg: `Query parameters were not set: ` + strings.Join(notSet, ", ")})
+		writeJSONResponseMessage(resp, http.StatusBadRequest, responseData{Msg: `Query parameters are missing or incorrect: ` + strings.Join(notSet, ", ")})
 		return
 	}
 
@@ -119,7 +121,6 @@ func (h *Handler) HandleGetConcepts(resp http.ResponseWriter, req *http.Request)
 		writeJSONResponseMessage(resp, http.StatusInternalServerError, responseData{Msg: "There was an error encoding the response", Err: err})
 		return
 	}
-
 	writeResponseData(resp, http.StatusOK, "application/json", string(uuidsJson))
 }
 
