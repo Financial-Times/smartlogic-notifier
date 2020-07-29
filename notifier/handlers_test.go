@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const smartlogicModel = "smartlogicModel"
+const smartlogicModel = "FTStagingModel"
 
 func TestHandlers(t *testing.T) {
 	t.Parallel()

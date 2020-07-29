@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -62,26 +63,12 @@ func WithTicker(t Ticker) func(*Handler) {
 
 func (h *Handler) HandleNotify(resp http.ResponseWriter, req *http.Request) {
 	vars := req.URL.Query()
-	var notSet []string
-	modifiedGraphId := vars.Get("modifiedGraphId")
-	if modifiedGraphId == "" || modifiedGraphId != h.model {
-		notSet = append(notSet, "modifiedGraphId")
-	}
-	affectedGraphId := vars.Get("affectedGraphId")
-	if affectedGraphId == "" || affectedGraphId != h.model {
-		notSet = append(notSet, "affectedGraphId")
-	}
-	lastChangeDate := vars.Get("lastChangeDate")
-	if lastChangeDate == "" {
-		notSet = append(notSet, "lastChangeDate")
-	}
-
+	notSet := checkQueryParams(h, &vars)
 	if len(notSet) > 0 {
 		writeJSONResponseMessage(resp, http.StatusBadRequest, responseData{Msg: `Query parameters are missing or incorrect: ` + strings.Join(notSet, ", ")})
 		return
 	}
-
-	lastChange, err := validateLastChangeDate(lastChangeDate)
+	lastChange, err := validateLastChangeDate(vars.Get("lastChangeDate"))
 	if err != nil {
 		writeJSONResponseMessage(resp, http.StatusBadRequest, responseData{Msg: err.Error()})
 		return
@@ -95,6 +82,23 @@ func (h *Handler) HandleNotify(resp http.ResponseWriter, req *http.Request) {
 	}()
 
 	writeJSONResponseMessage(resp, http.StatusOK, responseData{Msg: "Concepts successfully ingested"})
+}
+
+func checkQueryParams(h *Handler, vars *url.Values) []string {
+	var notSet []string
+	modifiedGraphID := vars.Get("modifiedGraphId")
+	if modifiedGraphID == "" || modifiedGraphID != h.model {
+		notSet = append(notSet, "modifiedGraphId")
+	}
+	affectedGraphID := vars.Get("affectedGraphId")
+	if affectedGraphID == "" || affectedGraphID != h.model {
+		notSet = append(notSet, "affectedGraphId")
+	}
+	lastChangeDate := vars.Get("lastChangeDate")
+	if lastChangeDate == "" {
+		notSet = append(notSet, "lastChangeDate")
+	}
+	return notSet
 }
 
 func (h *Handler) HandleGetConcepts(resp http.ResponseWriter, req *http.Request) {
