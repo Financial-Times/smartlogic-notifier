@@ -32,7 +32,7 @@ paths:
         - name: affectedGraphId
           in: query
           required: true
-          description: ID of a model which generated the notification.  In normal use, will be the same as modifiedGraphId.
+          description: ID of the model which generated the notification. In normal use, will be the same as modifiedGraphId.
           type: string
         - name: lastChangeDate
           in: query

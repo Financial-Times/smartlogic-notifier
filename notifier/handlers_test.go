@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	http "net/http"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -15,6 +15,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
+
+const smartlogicModel = "FTTestModel"
 
 func TestHandlers(t *testing.T) {
 	t.Parallel()
@@ -34,7 +36,7 @@ func TestHandlers(t *testing.T) {
 		{
 			name:       "Notify - Success",
 			method:     "GET",
-			url:        fmt.Sprintf("/notify?affectedGraphId=1&modifiedGraphId=2&lastChangeDate=%s", today),
+			url:        fmt.Sprintf("/notify?affectedGraphId=%s&modifiedGraphId=%s&lastChangeDate=%s", smartlogicModel, smartlogicModel, today),
 			resultBody: "{\"message\": \"Concepts successfully ingested\"}",
 			resultCode: 200,
 			mockService: &mockService{
@@ -46,9 +48,9 @@ func TestHandlers(t *testing.T) {
 		{
 			name:        "Notify - Missing query parameters",
 			method:      "GET",
-			url:         "/notify?modifiedGraphId=2&lastChangeDate=2017-05-31T13:00:00.000Z",
+			url:         fmt.Sprintf("/notify?modifiedGraphId=%s&lastChangeDate=2017-05-31T13:00:00.000Z", smartlogicModel),
 			resultCode:  400,
-			resultBody:  "{\"message\": \"Query parameters were not set: affectedGraphId\"}",
+			resultBody:  "{\"message\": \"Query parameters are missing or incorrect: affectedGraphId\"}",
 			mockService: &mockService{},
 		},
 		{
@@ -56,13 +58,21 @@ func TestHandlers(t *testing.T) {
 			method:      "GET",
 			url:         "/notify",
 			resultCode:  400,
-			resultBody:  "{\"message\": \"Query parameters were not set: modifiedGraphId, affectedGraphId, lastChangeDate\"}",
+			resultBody:  "{\"message\": \"Query parameters are missing or incorrect: modifiedGraphId, affectedGraphId, lastChangeDate\"}",
+			mockService: &mockService{},
+		},
+		{
+			name:        "Notify - Incorrect modifiedGraphId and affectedGraphId",
+			method:      "GET",
+			url:         fmt.Sprintf("/notify?affectedGraphId=1&modifiedGraphId=2&lastChangeDate=%s", today),
+			resultCode:  400,
+			resultBody:  "{\"message\": \"Query parameters are missing or incorrect: modifiedGraphId, affectedGraphId\"}",
 			mockService: &mockService{},
 		},
 		{
 			name:        "Notify - Bad query parameters ",
 			method:      "GET",
-			url:         "/notify?affectedGraphId=1&modifiedGraphId=2&lastChangeDate=notadate",
+			url:         fmt.Sprintf("/notify?affectedGraphId=%s&modifiedGraphId=%s&lastChangeDate=%s", smartlogicModel, smartlogicModel, "nodate"),
 			resultCode:  400,
 			resultBody:  "{\"message\": \"Date is not in the format 2006-01-02T15:04:05Z\"}",
 			mockService: &mockService{},
@@ -70,7 +80,7 @@ func TestHandlers(t *testing.T) {
 		{
 			name:        "Notify - Bad lastChangeDate parameter",
 			method:      "GET",
-			url:         fmt.Sprintf("/notify?affectedGraphId=1&modifiedGraphId=2&lastChangeDate=%s", past),
+			url:         fmt.Sprintf("/notify?affectedGraphId=%s&modifiedGraphId=%s&lastChangeDate=%s", smartlogicModel, smartlogicModel, past),
 			resultCode:  400,
 			resultBody:  fmt.Sprintf("{\"message\": \"Last change date should be time point in the last %.0f hours\"}", LastChangeLimit.Hours()),
 			mockService: &mockService{},
@@ -78,7 +88,7 @@ func TestHandlers(t *testing.T) {
 		{
 			name:       "Notify - Error",
 			method:     "GET",
-			url:        fmt.Sprintf("/notify?affectedGraphId=1&modifiedGraphId=2&lastChangeDate=%s", today),
+			url:        fmt.Sprintf("/notify?affectedGraphId=%s&modifiedGraphId=%s&lastChangeDate=%s", smartlogicModel, smartlogicModel, today),
 			resultBody: "{\"message\": \"Concepts successfully ingested\"}",
 			resultCode: 200,
 			mockService: &mockService{
@@ -234,7 +244,7 @@ func TestHandlers(t *testing.T) {
 
 	for _, d := range testCases {
 		t.Run(d.name, func(t *testing.T) {
-			handler := NewNotifierHandler(d.mockService)
+			handler := NewNotifierHandler(d.mockService, smartlogicModel)
 			m := mux.NewRouter()
 			handler.RegisterEndpoints(m)
 
@@ -330,14 +340,14 @@ func TestConcurrentNotify(t *testing.T) {
 			tickerInterval := test.duration / 2
 			tk := &ticker{ticker: time.NewTicker(tickerInterval)}
 
-			handler := NewNotifierHandler(service, WithTicker(tk))
+			handler := NewNotifierHandler(service, smartlogicModel, WithTicker(tk))
 
 			m := mux.NewRouter()
 			handler.RegisterEndpoints(m)
 
 			var reqs []*http.Request
 			for _, tPoint := range test.notificationTimes {
-				url := fmt.Sprintf("/notify?affectedGraphId=1&modifiedGraphId=2&lastChangeDate=%s%s", today, tPoint)
+				url := fmt.Sprintf("/notify?affectedGraphId=%s&modifiedGraphId=%s&lastChangeDate=%s%s", smartlogicModel, smartlogicModel, today, tPoint)
 				req, _ := http.NewRequest("GET", url, nil)
 				reqs = append(reqs, req)
 			}
@@ -457,14 +467,14 @@ func TestProcessingNotifyRequestsDoesNotBlock(t *testing.T) {
 			tickerInterval := test.duration / 10
 			tk := &mockTicker{ticker: time.NewTicker(tickerInterval)}
 
-			handler := NewNotifierHandler(service, WithTicker(tk))
+			handler := NewNotifierHandler(service, smartlogicModel, WithTicker(tk))
 
 			m := mux.NewRouter()
 			handler.RegisterEndpoints(m)
 
 			var reqs []*http.Request
 			for _, tPoint := range test.notificationTimes {
-				url := fmt.Sprintf("/notify?affectedGraphId=1&modifiedGraphId=2&lastChangeDate=%s%s", today, tPoint)
+				url := fmt.Sprintf("/notify?affectedGraphId=%s&modifiedGraphId=%s&lastChangeDate=%s%s", smartlogicModel, smartlogicModel, today, tPoint)
 				req, _ := http.NewRequest("GET", url, nil)
 				reqs = append(reqs, req)
 			}
@@ -503,7 +513,7 @@ func TestGettingSmartlogicChangesOneRequestAtATime(t *testing.T) {
 		},
 	}
 	today := time.Now().Format(TimeFormat)
-	requestURI := fmt.Sprintf("/notify?affectedGraphId=1&modifiedGraphId=2&lastChangeDate=%s", today)
+	requestURI := fmt.Sprintf("/notify?affectedGraphId=%s&modifiedGraphId=%s&lastChangeDate=%s", smartlogicModel, smartlogicModel, today)
 	for _, test := range testCases {
 		t.Run(test.name, func(t *testing.T) {
 			kc := &mockKafkaClient{}
@@ -522,7 +532,7 @@ func TestGettingSmartlogicChangesOneRequestAtATime(t *testing.T) {
 			tickerInterval := test.duration / 5
 			tk := &ticker{ticker: time.NewTicker(tickerInterval)}
 
-			handler := NewNotifierHandler(service, WithTicker(tk))
+			handler := NewNotifierHandler(service, smartlogicModel, WithTicker(tk))
 
 			m := mux.NewRouter()
 			handler.RegisterEndpoints(m)
