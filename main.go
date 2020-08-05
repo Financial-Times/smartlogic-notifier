@@ -65,7 +65,7 @@ func main() {
 
 	smartlogicAPIKey := app.String(cli.StringOpt{
 		Name:   "smartlogicAPIKey",
-		Desc:   "Smartlogic API key",
+		Desc:   "Smartlogic model to read from",
 		EnvVar: "SMARTLOGIC_API_KEY",
 	})
 
@@ -157,14 +157,14 @@ func main() {
 		}
 
 		httpClient := getResilientClient(smartlogicTimeoutDuration)
-		slClient, err := smartlogic.NewSmartlogicClient(httpClient, *smartlogicBaseURL, *smartlogicModel, *smartlogicAPIKey, *conceptUriPrefix)
+		sl, err := smartlogic.NewSmartlogicClient(httpClient, *smartlogicBaseURL, *smartlogicModel, *smartlogicAPIKey, *conceptUriPrefix)
 		if err != nil {
 			log.Error("Error generating access token when connecting to Smartlogic.  If this continues to fail, please check the configuration.")
 		}
 
-		service := notifier.NewNotifierService(kf, slClient)
+		service := notifier.NewNotifierService(kf, sl)
 
-		handler := notifier.NewNotifierHandler(service, *smartlogicModel)
+		handler := notifier.NewNotifierHandler(service)
 		handler.RegisterEndpoints(router)
 
 		healthServiceConfig := &notifier.HealthServiceConfig{

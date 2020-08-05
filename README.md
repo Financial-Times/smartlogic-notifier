@@ -4,7 +4,7 @@
 
 ## Introduction
 
-Entrypoint for concept publish notifications from the Smartlogic Semaphore system.
+Entrypoint for concept publish notifications from the Smartlogic Semaphore system
 
 ## Installation
 

@@ -20,27 +20,27 @@ type Servicer interface {
 }
 
 type Service struct {
-	kafka    kafka.Producer
-	slClient smartlogic.Clienter
+	kafka      kafka.Producer
+	smartlogic smartlogic.Clienter
 }
 
-func NewNotifierService(kafka kafka.Producer, slClient smartlogic.Clienter) *Service {
+func NewNotifierService(kafka kafka.Producer, smartlogic smartlogic.Clienter) Servicer {
 	return &Service{
-		kafka:    kafka,
-		slClient: slClient,
+		kafka:      kafka,
+		smartlogic: smartlogic,
 	}
 }
 
 func (s *Service) GetConcept(uuid string) ([]byte, error) {
-	return s.slClient.GetConcept(uuid)
+	return s.smartlogic.GetConcept(uuid)
 }
 
 func (s *Service) GetChangedConceptList(lastChange time.Time) (uuids []string, err error) {
-	return s.slClient.GetChangedConceptList(lastChange)
+	return s.smartlogic.GetChangedConceptList(lastChange)
 }
 
 func (s *Service) Notify(lastChange time.Time, transactionID string) error {
-	changedConcepts, err := s.slClient.GetChangedConceptList(lastChange)
+	changedConcepts, err := s.smartlogic.GetChangedConceptList(lastChange)
 	if err != nil {
 		return fmt.Errorf("failed to fetch the list of changed concepts: %w", err)
 	}
@@ -66,7 +66,7 @@ func (s *Service) ForceNotify(UUIDs []string, transactionID string) error {
 	errorMap := map[string]error{}
 
 	for _, conceptUUID := range UUIDs {
-		concept, err := s.slClient.GetConcept(conceptUUID)
+		concept, err := s.smartlogic.GetConcept(conceptUUID)
 		if err != nil {
 			errorMap[conceptUUID] = err
 			continue
