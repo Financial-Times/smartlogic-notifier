@@ -2,7 +2,6 @@
 replicaCount: 2
 service:
   name: smartlogic-notifier
-eksCluster: true
 config:
   smartlogicModelKey: "smartlogic.model"
   logLevel: INFO
