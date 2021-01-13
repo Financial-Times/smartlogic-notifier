@@ -103,7 +103,7 @@ func (c *Client) GetConcept(uuid string) ([]byte, error) {
 	ok, err := c.isExistingConcept(body)
 	if err != nil {
 		errorMsg := fmt.Errorf("invalid concept representation returned for uuid %v", uuid)
-		entry.WithError(err).Error(errorMsg)
+		entry.WithError(err).WithField("body", string(body)).Error(errorMsg)
 		return nil, errorMsg
 	}
 	if !ok {
