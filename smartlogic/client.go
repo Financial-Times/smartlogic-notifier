@@ -102,7 +102,9 @@ func (c *Client) GetConcept(uuid string) ([]byte, error) {
 	// we additionally validate the response in order to check whether the response is for existing concept.
 	ok, err := c.isExistingConcept(body)
 	if err != nil {
-		return nil, fmt.Errorf("invalid concept representation returned for uuid %v", uuid)
+		errorMsg := fmt.Errorf("invalid concept representation returned for uuid %v", uuid)
+		entry.WithError(err).Error(errorMsg)
+		return nil, errorMsg
 	}
 	if !ok {
 		return nil, ErrorConceptDoesNotExist
