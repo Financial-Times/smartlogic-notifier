@@ -8,7 +8,7 @@ smartlogic-notifier
 
 ## Primary URL
 
-<https://upp-prod-delivery-glb.upp.ft.com/__smartlogic-notifier/>
+<https://upp-prod-publish-glb.upp.ft.com/__smartlogic-notifier/>
 
 ## Service Tier
 
@@ -52,7 +52,7 @@ No
 
 ## Failover Architecture Type
 
-ActiveActive
+ActivePassive
 
 ## Failover Process Type
 
