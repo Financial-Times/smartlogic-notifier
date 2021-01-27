@@ -8,7 +8,7 @@ smartlogic-notifier
 
 ## Primary URL
 
-<https://github.com/Financial-Times/smartlogic-notifier>
+<https://upp-prod-delivery-glb.upp.ft.com/__smartlogic-notifier/>
 
 ## Service Tier
 
