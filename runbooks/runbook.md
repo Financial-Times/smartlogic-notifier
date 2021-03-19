@@ -1,3 +1,7 @@
+<!--
+    Written in the format prescribed by https://github.com/Financial-Times/runbook.md.
+    Any future edits should abide by this format.
+-->
 # UPP - Smartlogic Notifier
 
 Entrypoint for concept publish notifications from the Smartlogic Semaphore system.
@@ -8,7 +12,7 @@ smartlogic-notifier
 
 ## Primary URL
 
-<https://upp-prod-publish-glb.upp.ft.com/__smartlogic-notifier/>
+https://upp-prod-publish-glb.upp.ft.com/__smartlogic-notifier/
 
 ## Service Tier
 
@@ -17,22 +21,6 @@ Bronze
 ## Lifecycle Stage
 
 Production
-
-## Delivered By
-
-content
-
-## Supported By
-
-content
-
-## Known About By
-
-- elitsa.pavlova
-- kalin.arsov
-- ivan.nikolov
-- miroslav.gatsanoga
-- dimitar.terziev
 
 ## Host Platform
 
@@ -50,6 +38,14 @@ Further you could review the project code: <https://github.com/Financial-Times/s
 No
 
 ## Contains Sensitive Data
+
+No
+
+## Can Download Personal Data
+
+No
+
+## Can Contact Individuals
 
 No
 
@@ -89,6 +85,14 @@ Manual
 
 The release is triggered by making a Github release which is then picked up by a Jenkins multibranch pipeline. The Jenkins pipeline should be manually started in order for it to deploy the helm package to the Kubernetes clusters.
 
+<!-- Placeholder - remove HTML comment markers to activate
+## Heroku Pipeline Name
+Enter descriptive text satisfying the following:
+This is the name of the Heroku pipeline for this system. If you don't have a pipeline, this is the name of the app in Heroku. A pipeline is a group of Heroku apps that share the same codebase where each app in a pipeline represents the different stages in a continuous delivery workflow, i.e. staging, production.
+
+...or delete this placeholder if not applicable to this system
+-->
+
 ## Key Management Process Type
 
 NotApplicable
@@ -101,9 +105,8 @@ There is no key rotation procedure for this system.
 
 Look for the pods in the cluster health endpoint and click to see pod health and checks:
 
-- <https://upp-prod-publish-eu.upp.ft.com/__health/__pods-health?service-name=smartlogic-notifier>
-- <https://upp-prod-publish-us.upp.ft.com/__health/__pods-health?service-name=smartlogic-notifier>
-
+*   <https://upp-prod-publish-eu.upp.ft.com/__health/__pods-health?service-name=smartlogic-notifier>
+*   <https://upp-prod-publish-us.upp.ft.com/__health/__pods-health?service-name=smartlogic-notifier>
 
 ## First Line Troubleshooting
 
