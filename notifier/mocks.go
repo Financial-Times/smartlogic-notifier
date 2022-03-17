@@ -1,6 +1,7 @@
 package notifier
 
 import (
+	"context"
 	"errors"
 	"sync"
 	"time"
@@ -54,7 +55,7 @@ func (kf *mockKafkaClient) ConnectivityCheck() error {
 	return nil
 }
 
-func (kf *mockKafkaClient) SendMessage(message kafka.FTMessage) error {
+func (kf *mockKafkaClient) SendMessage(ctx context.Context, message kafka.FTMessage) error {
 	kf.mu.Lock()
 	defer kf.mu.Unlock()
 
@@ -93,14 +94,14 @@ func (s *mockService) GetChangedConceptList(lastChange time.Time) ([]string, err
 	return nil, errors.New("not implemented")
 }
 
-func (s *mockService) Notify(lastChange time.Time, transactionID string) error {
+func (s *mockService) Notify(ctx context.Context, lastChange time.Time, transactionID string) error {
 	if s.notify != nil {
 		return s.notify(lastChange, transactionID)
 	}
 	return errors.New("not implemented")
 }
 
-func (s *mockService) ForceNotify(uuids []string, transactionID string) error {
+func (s *mockService) ForceNotify(ctx context.Context, uuids []string, transactionID string) error {
 	if s.forceNotify != nil {
 		return s.forceNotify(uuids, transactionID)
 	}

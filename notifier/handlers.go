@@ -1,6 +1,7 @@
 package notifier
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,11 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Financial-Times/smartlogic-notifier/smartlogic"
 	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+	"go.opentelemetry.io/otel"
+
+	"github.com/Financial-Times/smartlogic-notifier/smartlogic"
 )
 
 // TimeFormat is the format used to read time values from request parameters
@@ -76,6 +79,7 @@ func (h *Handler) HandleNotify(resp http.ResponseWriter, req *http.Request) {
 	go func() {
 		transactionID := req.Header.Get(transactionidutils.TransactionIDHeader)
 		h.requestCh <- notificationRequest{
+			ctx:           req.Context(),
 			notifySince:   lastChange,
 			transactionID: transactionID,
 		}
@@ -127,7 +131,7 @@ func (h *Handler) HandleForceNotify(resp http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	err = h.notifier.ForceNotify(pl.UUIDs, req.Header.Get(transactionidutils.TransactionIDHeader))
+	err = h.notifier.ForceNotify(req.Context(), pl.UUIDs, req.Header.Get(transactionidutils.TransactionIDHeader))
 	if err != nil {
 		writeJSONResponseMessage(resp, http.StatusInternalServerError, responseData{Msg: "There was an error completing the force notify"})
 		return
@@ -177,6 +181,7 @@ func (h *Handler) RegisterEndpoints(router *mux.Router) {
 }
 
 type notificationRequest struct {
+	ctx           context.Context
 	notifySince   time.Time
 	transactionID string
 }
@@ -200,8 +205,9 @@ func (h *Handler) processNotifyRequests() {
 		if len(h.requestCh) == 0 {
 			continue
 		}
-
-		n := notificationRequest{notifySince: maxTimeValue}
+		tr := otel.Tracer("notify max process")
+		ctx, span := tr.Start(context.Background(), "processNotifyRequests")
+		n := notificationRequest{ctx: ctx, notifySince: maxTimeValue}
 		for req := range h.requestCh {
 			if n.notifySince.After(req.notifySince) {
 				n = req
@@ -212,10 +218,11 @@ func (h *Handler) processNotifyRequests() {
 			}
 		}
 
-		err := h.notifier.Notify(n.notifySince, n.transactionID)
+		err := h.notifier.Notify(n.ctx, n.notifySince, n.transactionID)
 		if err != nil {
 			log.WithError(err).Errorf("Failed to notify for a change with transaction id %s since %v", n.transactionID, n.notifySince)
 		}
+		span.End()
 	}
 }
 

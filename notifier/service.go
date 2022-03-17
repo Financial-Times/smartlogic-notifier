@@ -1,21 +1,23 @@
 package notifier
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/Financial-Times/kafka-client-go/kafka"
-	"github.com/Financial-Times/smartlogic-notifier/smartlogic"
 	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/Financial-Times/smartlogic-notifier/smartlogic"
 )
 
 type Servicer interface {
 	GetConcept(uuid string) ([]byte, error)
 	GetChangedConceptList(lastChange time.Time) ([]string, error)
-	Notify(lastChange time.Time, transactionID string) error
-	ForceNotify(UUIDs []string, transactionID string) error
+	Notify(ctx context.Context, lastChange time.Time, transactionID string) error
+	ForceNotify(ctx context.Context, UUIDs []string, transactionID string) error
 	CheckKafkaConnectivity() error
 }
 
@@ -39,7 +41,7 @@ func (s *Service) GetChangedConceptList(lastChange time.Time) (uuids []string, e
 	return s.slClient.GetChangedConceptList(lastChange)
 }
 
-func (s *Service) Notify(lastChange time.Time, transactionID string) error {
+func (s *Service) Notify(ctx context.Context, lastChange time.Time, transactionID string) error {
 	changedConcepts, err := s.slClient.GetChangedConceptList(lastChange)
 	if err != nil {
 		return fmt.Errorf("failed to fetch the list of changed concepts: %w", err)
@@ -59,10 +61,10 @@ func (s *Service) Notify(lastChange time.Time, transactionID string) error {
 		return fmt.Errorf("no changed concepts since %v were returned for transaction id %s", lastChange, transactionID)
 	}
 
-	return s.ForceNotify(changedConcepts, transactionID)
+	return s.ForceNotify(ctx, changedConcepts, transactionID)
 }
 
-func (s *Service) ForceNotify(UUIDs []string, transactionID string) error {
+func (s *Service) ForceNotify(ctx context.Context, UUIDs []string, transactionID string) error {
 	errorMap := map[string]error{}
 
 	for _, conceptUUID := range UUIDs {
@@ -83,7 +85,7 @@ func (s *Service) ForceNotify(UUIDs []string, transactionID string) error {
 			"concept_transaction_id": newTransactionID,
 			"concept_uuid":           conceptUUID,
 		}).Info("Sending message to Kafka")
-		err = s.kafka.SendMessage(message)
+		err = s.kafka.SendMessage(ctx, message)
 		if err != nil {
 			errorMap[conceptUUID] = err
 		}

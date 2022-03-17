@@ -1,18 +1,25 @@
 package main
 
 import (
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	logV2 "github.com/Financial-Times/go-logger/v2"
 	"github.com/gorilla/mux"
 	cli "github.com/jawher/mow.cli"
 	"github.com/sethgrid/pester"
 	log "github.com/sirupsen/logrus"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 
 	"github.com/Financial-Times/kafka-client-go/kafka"
+
+	"github.com/ivan-p-nikolov/jeager-service-example/fttracing"
+
 	"github.com/Financial-Times/smartlogic-notifier/notifier"
 	"github.com/Financial-Times/smartlogic-notifier/smartlogic"
 )
@@ -145,13 +152,24 @@ func main() {
 
 	log.Infof("Caching successful health for %s", smartlogicHealthCacheDuration)
 	log.Infof("Checking Smartlogic health via getting concept %s of model %s", *smartlogicHealthcheckConcept, *smartlogicModel)
-
+	shutdown, err := fttracing.InitTracing(*appName)
+	if err != nil {
+		log.WithError(err).Warn("failed to init tracing")
+	}
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{}))
+	if shutdown != nil {
+		defer shutdown()
+	}
+	l2 := logV2.NewUnstructuredLogger()
+	l2.Logger.Out = ioutil.Discard
 	app.Action = func() {
 		log.Infof("System code: %s, App Name: %s, Port: %s", *appSystemCode, *appName, *port)
 
 		router := mux.NewRouter()
 
-		kf, err := kafka.NewProducer(*kafkaAddresses, *kafkaTopic, kafka.DefaultProducerConfig())
+		kf, err := kafka.NewProducer(*kafkaAddresses, *kafkaTopic, kafka.DefaultProducerConfig(), l2)
 		if err != nil {
 			log.WithField("kafkaAddresses", *kafkaAddresses).WithField("kafkaTopic", *kafkaTopic).Fatalf("Error creating the Kafka producer.")
 		}
@@ -166,6 +184,7 @@ func main() {
 
 		handler := notifier.NewNotifierHandler(service, *smartlogicModel)
 		handler.RegisterEndpoints(router)
+		fttracing.AddTelemetry(router, *appName)
 
 		healthServiceConfig := &notifier.HealthServiceConfig{
 			AppSystemCode:          *appSystemCode,
@@ -204,14 +223,15 @@ func waitForSignal() {
 }
 
 func getResilientClient(timeout time.Duration) *pester.Client {
-	c := &http.Client{
+	c := http.Client{
 		Transport: &http.Transport{
 			MaxIdleConnsPerHost: 10,
 			MaxIdleConns:        10,
 		},
 		Timeout: timeout,
 	}
-	client := pester.NewExtendedClient(c)
+	c = fttracing.NewHTTPClient(c.Transport)
+	client := pester.NewExtendedClient(&c)
 	client.Backoff = pester.ExponentialBackoff
 	client.MaxRetries = 5
 	client.Concurrency = 1

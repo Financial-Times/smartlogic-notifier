@@ -1,6 +1,7 @@
 package notifier
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -48,7 +49,7 @@ func TestService_Notify(t *testing.T) {
 
 	service := NewNotifierService(kc, sl)
 
-	err := service.Notify(time.Now(), "transactionID")
+	err := service.Notify(context.TODO(), time.Now(), "transactionID")
 
 	assert.NoError(t, err)
 	assert.Equal(t, 1, kc.sentCount)
@@ -74,7 +75,7 @@ func TestService_RetryNotify(t *testing.T) {
 
 	service := NewNotifierService(kc, sl)
 
-	err := service.Notify(time.Now(), "transactionID")
+	err := service.Notify(context.TODO(), time.Now(), "transactionID")
 
 	assert.NoError(t, err)
 	assert.Equal(t, 1, kc.sentCount)
@@ -94,7 +95,7 @@ func TestService_ForceNotify(t *testing.T) {
 
 	service := NewNotifierService(kc, sl)
 
-	err := service.ForceNotify([]string{"uuid1"}, "transactionID")
+	err := service.ForceNotify(context.TODO(), []string{"uuid1"}, "transactionID")
 
 	assert.NoError(t, err)
 	assert.Equal(t, 1, kc.sentCount)
