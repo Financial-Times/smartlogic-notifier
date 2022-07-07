@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Financial-Times/go-logger/v2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,6 +26,7 @@ func NewSmartlogicTestClient(httpClient httpClient, baseURL string, model string
 		conceptURIPrefix: conceptURIPrefix,
 		apiKey:           apiKey,
 		httpClient:       httpClient,
+		log:              logger.NewUnstructuredLogger(),
 	}
 
 	return client, nil
@@ -41,6 +43,7 @@ func TestNewSmartlogicClient_Success(t *testing.T) {
 			statusCode: http.StatusOK,
 			err:        nil,
 		}, "http://base/url", "modelName", "apiKey", "conceptUriPrefix",
+		logger.NewUnstructuredLogger(),
 	)
 	assert.NoError(t, err)
 	assert.EqualValues(t, tokenResponseValue, sl.AccessToken())
@@ -57,6 +60,7 @@ func TestNewSmartlogicClient_BadURL(t *testing.T) {
 			statusCode: http.StatusOK,
 			err:        nil,
 		}, "http:// base/url", "modelName", "apiKey", "conceptUriPrefix",
+		logger.NewUnstructuredLogger(),
 	)
 	assert.Error(t, err)
 }
@@ -71,6 +75,7 @@ func TestNewSmartlogicClient_NoToken(t *testing.T) {
 			statusCode: http.StatusOK,
 			err:        nil,
 		}, "http://base/url", "modelName", "apiKey", "conceptUriPrefix",
+		logger.NewUnstructuredLogger(),
 	)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "", sl.AccessToken())
@@ -87,6 +92,7 @@ func TestNewSmartlogicClient_BadResponse(t *testing.T) {
 			statusCode: http.StatusNotFound,
 			err:        responseError,
 		}, "http://base/url", "modelName", "apiKey", "conceptUriPrefix",
+		logger.NewUnstructuredLogger(),
 	)
 	assert.Error(t, err)
 	assert.EqualValues(t, responseError, err)
@@ -102,6 +108,7 @@ func TestNewSmartlogicClient_BadJSON(t *testing.T) {
 			statusCode: http.StatusOK,
 			err:        nil,
 		}, "http://base/url", "modelName", "apiKey", "conceptUriPrefix",
+		logger.NewUnstructuredLogger(),
 	)
 	assert.Error(t, err)
 	assert.IsType(t, &json.SyntaxError{}, err)

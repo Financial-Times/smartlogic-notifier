@@ -7,14 +7,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Financial-Times/go-logger/v2"
+	"github.com/Financial-Times/kafka-client-go/v3"
+	"github.com/Financial-Times/smartlogic-notifier/notifier"
+	"github.com/Financial-Times/smartlogic-notifier/smartlogic"
 	"github.com/gorilla/mux"
 	cli "github.com/jawher/mow.cli"
 	"github.com/sethgrid/pester"
-	log "github.com/sirupsen/logrus"
-
-	"github.com/Financial-Times/kafka-client-go/kafka"
-	"github.com/Financial-Times/smartlogic-notifier/notifier"
-	"github.com/Financial-Times/smartlogic-notifier/smartlogic"
 )
 
 const appDescription = "Entrypoint for concept publish notifications from the Smartlogic Semaphore system"
@@ -110,13 +109,7 @@ func main() {
 		EnvVar: "CONCEPT_URI_PREFIX",
 	})
 
-	lvl, err := log.ParseLevel(*logLevel)
-	if err != nil {
-		log.Warnf("Log level %s could not be parsed, defaulting to info", *logLevel)
-		lvl = log.InfoLevel
-	}
-	log.SetLevel(lvl)
-	log.SetFormatter(&log.JSONFormatter{})
+	log := logger.NewUPPLogger(*appName, *logLevel)
 	log.Infof("[Startup] %s is starting", *appSystemCode)
 
 	smartlogicHealthCacheDuration, err := time.ParseDuration(*smartlogicHealthCacheFor)
@@ -151,20 +144,21 @@ func main() {
 
 		router := mux.NewRouter()
 
-		kf, err := kafka.NewProducer(*kafkaAddresses, *kafkaTopic, kafka.DefaultProducerConfig())
-		if err != nil {
-			log.WithField("kafkaAddresses", *kafkaAddresses).WithField("kafkaTopic", *kafkaTopic).Fatalf("Error creating the Kafka producer.")
+		producerConfig := kafka.ProducerConfig{
+			Topic:                   *kafkaTopic,
+			BrokersConnectionString: *kafkaAddresses,
+			Options:                 kafka.DefaultProducerOptions(),
 		}
-
+		producer := kafka.NewProducer(producerConfig, log)
 		httpClient := getResilientClient(smartlogicTimeoutDuration)
-		slClient, err := smartlogic.NewSmartlogicClient(httpClient, *smartlogicBaseURL, *smartlogicModel, *smartlogicAPIKey, *conceptUriPrefix)
+		slClient, err := smartlogic.NewSmartlogicClient(httpClient, *smartlogicBaseURL, *smartlogicModel, *smartlogicAPIKey, *conceptUriPrefix, log)
 		if err != nil {
 			log.Error("Error generating access token when connecting to Smartlogic.  If this continues to fail, please check the configuration.")
 		}
 
-		service := notifier.NewNotifierService(kf, slClient)
+		service := notifier.NewNotifierService(producer, slClient, log)
 
-		handler := notifier.NewNotifierHandler(service, *smartlogicModel)
+		handler := notifier.NewNotifierHandler(service, *smartlogicModel, log)
 		handler.RegisterEndpoints(router)
 
 		healthServiceConfig := &notifier.HealthServiceConfig{
@@ -175,7 +169,7 @@ func main() {
 			SmartlogicModelConcept: *smartlogicHealthcheckConcept,
 			SuccessCacheTime:       smartlogicHealthCacheDuration,
 		}
-		healthService, err := notifier.NewHealthService(service, healthServiceConfig)
+		healthService, err := notifier.NewHealthService(service, healthServiceConfig, log)
 		if err != nil {
 			log.Fatalf("Failed to initialize health check service: %v", err)
 		}
