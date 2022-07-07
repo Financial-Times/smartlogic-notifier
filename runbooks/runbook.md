@@ -18,22 +18,6 @@ Bronze
 
 Production
 
-## Delivered By
-
-content
-
-## Supported By
-
-content
-
-## Known About By
-
-- elitsa.pavlova
-- kalin.arsov
-- ivan.nikolov
-- miroslav.gatsanoga
-- dimitar.terziev
-
 ## Host Platform
 
 AWS

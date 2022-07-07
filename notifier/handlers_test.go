@@ -5,14 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/Financial-Times/go-logger/v2"
 	"github.com/Financial-Times/smartlogic-notifier/smartlogic"
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +21,6 @@ const smartlogicModel = "FTTestModel"
 
 func TestHandlers(t *testing.T) {
 	t.Parallel()
-	log.SetOutput(ioutil.Discard)
 
 	today := time.Now().Format(TimeFormat)
 	past := time.Date(1900, 1, 1, 0, 0, 0, 0, time.Local).Format(TimeFormat)
@@ -244,7 +244,7 @@ func TestHandlers(t *testing.T) {
 
 	for _, d := range testCases {
 		t.Run(d.name, func(t *testing.T) {
-			handler := NewNotifierHandler(d.mockService, smartlogicModel)
+			handler := NewNotifierHandler(d.mockService, smartlogicModel, logger.NewUnstructuredLogger())
 			m := mux.NewRouter()
 			handler.RegisterEndpoints(m)
 
@@ -256,7 +256,7 @@ func TestHandlers(t *testing.T) {
 				SmartlogicModelConcept: "testConcept",
 				SuccessCacheTime:       1 * time.Minute,
 			}
-			healthService, err := NewHealthService(d.mockService, healthConfig)
+			healthService, err := NewHealthService(d.mockService, healthConfig, logger.NewUnstructuredLogger())
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -334,13 +334,13 @@ func TestConcurrentNotify(t *testing.T) {
 				},
 			}
 
-			service := NewNotifierService(kc, sl)
+			service := NewNotifierService(kc, sl, logger.NewUnstructuredLogger())
 
 			// making sure the ticker will fire at least once during the test execution
 			tickerInterval := test.duration / 2
 			tk := &ticker{ticker: time.NewTicker(tickerInterval)}
 
-			handler := NewNotifierHandler(service, smartlogicModel, WithTicker(tk))
+			handler := NewNotifierHandler(service, smartlogicModel, logger.NewUnstructuredLogger(), WithTicker(tk))
 
 			m := mux.NewRouter()
 			handler.RegisterEndpoints(m)
@@ -462,12 +462,12 @@ func TestProcessingNotifyRequestsDoesNotBlock(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 			kc := &mockKafkaClient{}
-			service := NewNotifierService(kc, test.slClient)
+			service := NewNotifierService(kc, test.slClient, logger.NewUnstructuredLogger())
 
 			tickerInterval := test.duration / 10
 			tk := &mockTicker{ticker: time.NewTicker(tickerInterval)}
 
-			handler := NewNotifierHandler(service, smartlogicModel, WithTicker(tk))
+			handler := NewNotifierHandler(service, smartlogicModel, logger.NewUnstructuredLogger(), WithTicker(tk))
 
 			m := mux.NewRouter()
 			handler.RegisterEndpoints(m)
@@ -527,12 +527,12 @@ func TestGettingSmartlogicChangesOneRequestAtATime(t *testing.T) {
 				},
 			}
 
-			service := NewNotifierService(kc, sl)
+			service := NewNotifierService(kc, sl, logger.NewUnstructuredLogger())
 
 			tickerInterval := test.duration / 5
 			tk := &ticker{ticker: time.NewTicker(tickerInterval)}
 
-			handler := NewNotifierHandler(service, smartlogicModel, WithTicker(tk))
+			handler := NewNotifierHandler(service, smartlogicModel, logger.NewUnstructuredLogger(), WithTicker(tk))
 
 			m := mux.NewRouter()
 			handler.RegisterEndpoints(m)

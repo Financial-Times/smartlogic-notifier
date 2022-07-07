@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Financial-Times/go-logger/v2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,7 +12,7 @@ func TestNewNotifierService(t *testing.T) {
 	kc := &mockKafkaClient{}
 	sl := &mockSmartlogicClient{}
 
-	service := NewNotifierService(kc, sl)
+	service := NewNotifierService(kc, sl, logger.NewUnstructuredLogger())
 	assert.IsType(t, &Service{}, service)
 }
 
@@ -27,7 +28,7 @@ func TestService_GetConcept(t *testing.T) {
 		},
 	}
 
-	service := NewNotifierService(kc, sl)
+	service := NewNotifierService(kc, sl, logger.NewUnstructuredLogger())
 
 	concept, err := service.GetConcept("uuid2")
 	assert.NoError(t, err)
@@ -46,7 +47,7 @@ func TestService_Notify(t *testing.T) {
 		},
 	}
 
-	service := NewNotifierService(kc, sl)
+	service := NewNotifierService(kc, sl, logger.NewUnstructuredLogger())
 
 	err := service.Notify(time.Now(), "transactionID")
 
@@ -72,7 +73,7 @@ func TestService_RetryNotify(t *testing.T) {
 		},
 	}
 
-	service := NewNotifierService(kc, sl)
+	service := NewNotifierService(kc, sl, logger.NewUnstructuredLogger())
 
 	err := service.Notify(time.Now(), "transactionID")
 
@@ -92,7 +93,7 @@ func TestService_ForceNotify(t *testing.T) {
 		},
 	}
 
-	service := NewNotifierService(kc, sl)
+	service := NewNotifierService(kc, sl, logger.NewUnstructuredLogger())
 
 	err := service.ForceNotify([]string{"uuid1"}, "transactionID")
 

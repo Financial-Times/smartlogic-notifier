@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Financial-Times/go-logger/v2"
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -108,7 +108,7 @@ func TestNewHealthService(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := NewHealthService(&mockService{}, &test.config)
+			_, err := NewHealthService(&mockService{}, &test.config, logger.NewUnstructuredLogger())
 			if err != nil && !test.expectedError {
 				t.Errorf("unexpected error initializing HealthService: %v", err)
 			}
@@ -121,7 +121,6 @@ func TestNewHealthService(t *testing.T) {
 
 func TestHealthServiceChecks(t *testing.T) {
 	t.Parallel()
-	log.SetOutput(ioutil.Discard)
 
 	tests := []struct {
 		name           string
@@ -218,7 +217,7 @@ func TestHealthServiceChecks(t *testing.T) {
 				SmartlogicModelConcept: "testConcept",
 				SuccessCacheTime:       healthcheckCacheInterval,
 			}
-			healthService, err := NewHealthService(test.mockService, healthConfig)
+			healthService, err := NewHealthService(test.mockService, healthConfig, logger.NewUnstructuredLogger())
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -235,7 +234,6 @@ func TestHealthServiceChecks(t *testing.T) {
 
 func TestHealthServiceCache(t *testing.T) {
 	t.Parallel()
-	log.SetOutput(ioutil.Discard)
 
 	tests := []struct {
 		name                  string
@@ -289,7 +287,7 @@ func TestHealthServiceCache(t *testing.T) {
 				SmartlogicModelConcept: "testConcept",
 				SuccessCacheTime:       healthcheckCacheInterval,
 			}
-			healthService, err := NewHealthService(mockSvc, healthConfig)
+			healthService, err := NewHealthService(mockSvc, healthConfig, logger.NewUnstructuredLogger())
 			if err != nil {
 				t.Fatal(err)
 			}
