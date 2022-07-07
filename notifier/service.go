@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Financial-Times/kafka-client-go/kafka"
+	"github.com/Financial-Times/go-logger/v2"
+	"github.com/Financial-Times/kafka-client-go/v3"
 	"github.com/Financial-Times/smartlogic-notifier/smartlogic"
 	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
-	log "github.com/sirupsen/logrus"
 )
 
 type Servicer interface {
@@ -20,14 +20,21 @@ type Servicer interface {
 }
 
 type Service struct {
-	kafka    kafka.Producer
+	producer messageProducer
 	slClient smartlogic.Clienter
+	log      *logger.UPPLogger
 }
 
-func NewNotifierService(kafka kafka.Producer, slClient smartlogic.Clienter) *Service {
+type messageProducer interface {
+	SendMessage(message kafka.FTMessage) error
+	ConnectivityCheck() error
+}
+
+func NewNotifierService(producer messageProducer, slClient smartlogic.Clienter, log *logger.UPPLogger) *Service {
 	return &Service{
-		kafka:    kafka,
+		producer: producer,
 		slClient: slClient,
+		log:      log,
 	}
 }
 
@@ -77,13 +84,12 @@ func (s *Service) ForceNotify(UUIDs []string, transactionID string) error {
 		message := kafka.NewFTMessage(map[string]string{
 			transactionidutils.TransactionIDHeader: newTransactionID,
 		}, string(concept))
-
-		log.WithFields(log.Fields{
-			"request_transaction_id": transactionID,
-			"concept_transaction_id": newTransactionID,
-			"concept_uuid":           conceptUUID,
-		}).Info("Sending message to Kafka")
-		err = s.kafka.SendMessage(message)
+		s.log.
+			WithTransactionID(transactionID).
+			WithField("concept_transaction_id", newTransactionID).
+			WithField("concept_uuid", conceptUUID).
+			Info("Sending message to Kafka")
+		err = s.producer.SendMessage(message)
 		if err != nil {
 			errorMap[conceptUUID] = err
 		}
@@ -91,15 +97,15 @@ func (s *Service) ForceNotify(UUIDs []string, transactionID string) error {
 
 	if len(errorMap) > 0 {
 		errorMsg := fmt.Sprintf("There was an error with %d concept ingestions", len(errorMap))
-		log.WithField("errorMap", errorMap).Error(errorMsg)
+		s.log.WithField("errorMap", errorMap).Error(errorMsg)
 		return errors.New(errorMsg)
 	}
 	if len(UUIDs) > 0 {
-		log.WithField("uuids", UUIDs).Info("Completed notification of concepts")
+		s.log.WithField("uuids", UUIDs).Info("Completed notification of concepts")
 	}
 	return nil
 }
 
 func (s *Service) CheckKafkaConnectivity() error {
-	return s.kafka.ConnectivityCheck()
+	return s.producer.ConnectivityCheck()
 }

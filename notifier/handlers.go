@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Financial-Times/go-logger/v2"
 	"github.com/Financial-Times/smartlogic-notifier/smartlogic"
 	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
 )
 
 // TimeFormat is the format used to read time values from request parameters
@@ -30,14 +30,16 @@ type Handler struct {
 	ticker    Ticker
 	requestCh chan notificationRequest
 	model     string
+	log       *logger.UPPLogger
 }
 
-func NewNotifierHandler(notifier Servicer, smartlogicModel string, opts ...func(*Handler)) *Handler {
+func NewNotifierHandler(notifier Servicer, smartlogicModel string, log *logger.UPPLogger, opts ...func(*Handler)) *Handler {
 	h := &Handler{
 		notifier:  notifier,
 		ticker:    &ticker{ticker: time.NewTicker(5 * time.Second)},
 		requestCh: make(chan notificationRequest, 1),
 		model:     smartlogicModel,
+		log:       log,
 	}
 
 	for _, opt := range opts {
@@ -68,7 +70,7 @@ func (h *Handler) HandleNotify(resp http.ResponseWriter, req *http.Request) {
 		writeJSONResponseMessage(resp, http.StatusBadRequest, responseData{Msg: err.Error()})
 		return
 	}
-	lastChange, err := validateLastChangeDate(vars.Get("lastChangeDate"))
+	lastChange, err := h.validateLastChangeDate(vars.Get("lastChangeDate"))
 	if err != nil {
 		writeJSONResponseMessage(resp, http.StatusBadRequest, responseData{Msg: err.Error()})
 		return
@@ -91,7 +93,7 @@ func (h *Handler) HandleGetConcepts(resp http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	lastChange, err := validateLastChangeDate(lastChangeDate)
+	lastChange, err := h.validateLastChangeDate(lastChangeDate)
 	if err != nil {
 		writeJSONResponseMessage(resp, http.StatusBadRequest, responseData{Msg: err.Error()})
 		return
@@ -214,7 +216,7 @@ func (h *Handler) processNotifyRequests() {
 
 		err := h.notifier.Notify(n.notifySince, n.transactionID)
 		if err != nil {
-			log.WithError(err).Errorf("Failed to notify for a change with transaction id %s since %v", n.transactionID, n.notifySince)
+			h.log.WithError(err).Errorf("Failed to notify for a change with transaction id %s since %v", n.transactionID, n.notifySince)
 		}
 	}
 }
@@ -241,14 +243,14 @@ func writeJSONResponseMessage(w http.ResponseWriter, statusCode int, resp respon
 	writeResponseData(w, statusCode, "application/json", msg)
 }
 
-func validateLastChangeDate(change string) (time.Time, error) {
+func (h *Handler) validateLastChangeDate(change string) (time.Time, error) {
 	lastChange, err := time.Parse(TimeFormat, change)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("Date is not in the format %s", TimeFormat)
 	}
-	log.WithField("time", lastChange).Debug("Parsing notification time")
+	h.log.WithField("time", lastChange).Debug("Parsing notification time")
 	lastChange = lastChange.Add(-10 * time.Millisecond)
-	log.WithField("time", lastChange).Debug("Subtracting notification time wobble")
+	h.log.WithField("time", lastChange).Debug("Subtracting notification time wobble")
 
 	if time.Since(lastChange) > LastChangeLimit {
 		return time.Time{}, fmt.Errorf("Last change date should be time point in the last %.0f hours", LastChangeLimit.Hours())
