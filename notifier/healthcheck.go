@@ -8,12 +8,12 @@ import (
 	"time"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
-	"github.com/Financial-Times/http-handlers-go/httphandlers"
+	"github.com/Financial-Times/go-logger/v2"
+	"github.com/Financial-Times/http-handlers-go/v2/httphandlers"
 	"github.com/Financial-Times/service-status-go/gtg"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
 	"github.com/gorilla/mux"
 	"github.com/rcrowley/go-metrics"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -28,6 +28,7 @@ type HealthService struct {
 	notifier          Servicer
 	Checks            []fthealth.Check
 	checkSuccessCache bool
+	log               *logger.UPPLogger
 }
 
 type HealthServiceConfig struct {
@@ -62,7 +63,7 @@ func (c *HealthServiceConfig) Validate() error {
 }
 
 // NewHealthService initialises the HealthCheck service but doesn't start the updating of the health check result.
-func NewHealthService(notifier Servicer, config *HealthServiceConfig) (*HealthService, error) {
+func NewHealthService(notifier Servicer, config *HealthServiceConfig, log *logger.UPPLogger) (*HealthService, error) {
 	err := config.Validate()
 	if err != nil {
 		return nil, fmt.Errorf("invalid config: %w", err)
@@ -71,6 +72,7 @@ func NewHealthService(notifier Servicer, config *HealthServiceConfig) (*HealthSe
 	service := &HealthService{
 		config:   config,
 		notifier: notifier,
+		log:      log,
 	}
 	service.Checks = []fthealth.Check{
 		service.kafkaHealthCheck(),
@@ -85,14 +87,14 @@ func (hs *HealthService) Start() {
 		// perform connectivity check and cache the result
 		err := hs.updateSmartlogicSuccessCache()
 		if err != nil {
-			log.WithError(err).Error("could not perform Smartlogic connectivity check")
+			hs.log.WithError(err).Error("could not perform Smartlogic connectivity check")
 		}
 		ticker := time.NewTicker(hs.config.SuccessCacheTime)
 		defer ticker.Stop()
 		for range ticker.C {
 			err := hs.updateSmartlogicSuccessCache()
 			if err != nil {
-				log.WithError(err).Error("could not perform latest Smartlogic connectivity check")
+				hs.log.WithError(err).Error("could not perform latest Smartlogic connectivity check")
 			}
 		}
 	}()
@@ -103,7 +105,7 @@ func (hs *HealthService) Start() {
 func (hs *HealthService) updateSmartlogicSuccessCache() error {
 	_, err := hs.notifier.GetConcept(hs.config.SmartlogicModelConcept)
 	if err != nil {
-		log.WithError(err).Errorf("health check concept %s couldn't be retrieved", hs.config.SmartlogicModelConcept)
+		hs.log.WithError(err).Errorf("health check concept %s couldn't be retrieved", hs.config.SmartlogicModelConcept)
 		hs.setCheckSuccessCache(false)
 		return err
 	}
@@ -118,7 +120,7 @@ func (hs *HealthService) RegisterAdminEndpoints(router *mux.Router) http.Handler
 	router.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
 
 	var monitoringRouter http.Handler = router
-	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
+	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(hs.log, monitoringRouter)
 	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
 
 	return monitoringRouter
@@ -163,7 +165,7 @@ func (hs *HealthService) kafkaHealthCheck() fthealth.Check {
 func (hs *HealthService) smartlogicConnectivityCheck() (string, error) {
 	if !hs.getCheckSuccessCache() {
 		msg := "latest Smartlogic connectivity check is unsuccessful"
-		log.Error(msg)
+		hs.log.Error(msg)
 		return msg, errors.New(msg)
 	}
 	return "", nil
@@ -173,7 +175,7 @@ func (hs *HealthService) checkKafkaConnectivity() (string, error) {
 	err := hs.notifier.CheckKafkaConnectivity()
 	if err != nil {
 		clientError := fmt.Sprint("Error verifying open connection to Kafka")
-		log.WithError(err).Error(clientError)
+		hs.log.WithError(err).Error(clientError)
 		return "Error connecting with Kafka", errors.New(clientError)
 	} else {
 		return "Successfully connected to Kafka", nil
