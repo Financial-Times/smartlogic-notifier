@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Financial-Times/kafka-client-go/v3"
+	"github.com/Financial-Times/kafka-client-go/v4"
 )
 
 type mockSmartlogicClient struct {
