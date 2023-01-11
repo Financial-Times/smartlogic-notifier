@@ -54,6 +54,11 @@ spec:
             configMapKeyRef:
               name: global-config
               key: msk.kafka.broker.url
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: global-config
+              key: aws.region
         - name: KAFKA_CLUSTER_ARN
           valueFrom:
             configMapKeyRef:
