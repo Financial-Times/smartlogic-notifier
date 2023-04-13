@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/Financial-Times/go-logger/v2"
-	"github.com/Financial-Times/kafka-client-go/v3"
+	"github.com/Financial-Times/kafka-client-go/v4"
 	"github.com/Financial-Times/smartlogic-notifier/notifier"
 	"github.com/Financial-Times/smartlogic-notifier/smartlogic"
 	"github.com/gorilla/mux"
@@ -48,6 +48,13 @@ func main() {
 		Value:  "SmartlogicConcept",
 		Desc:   "Kafka topic to send messages to",
 		EnvVar: "KAFKA_TOPIC",
+	})
+
+	kafkaClusterArn := app.String(cli.StringOpt{
+		Name:   "kafkaClusterArn",
+		Desc:   "Kafka cluster ARN used by the producer for maintenance monitoring",
+		EnvVar: "KAFKA_CLUSTER_ARN",
+		Value:  "",
 	})
 
 	smartlogicBaseURL := app.String(cli.StringOpt{
@@ -148,8 +155,12 @@ func main() {
 			Topic:                   *kafkaTopic,
 			BrokersConnectionString: *kafkaAddresses,
 			Options:                 kafka.DefaultProducerOptions(),
+			ClusterArn:              kafkaClusterArn,
 		}
-		producer := kafka.NewProducer(producerConfig, log)
+		producer, innerErr := kafka.NewProducer(producerConfig)
+		if innerErr != nil {
+			log.WithError(innerErr).Fatal("Unable to create kafka producer")
+		}
 		httpClient := getResilientClient(smartlogicTimeoutDuration)
 		slClient, err := smartlogic.NewSmartlogicClient(httpClient, *smartlogicBaseURL, *smartlogicModel, *smartlogicAPIKey, *conceptUriPrefix, log)
 		if err != nil {

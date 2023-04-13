@@ -29,6 +29,7 @@ Options:
         --app-name="Smartlogic Notifier"                Application name ($APP_NAME)
         --kafkaAddresses="localhost:9092"               Comma separated list of Kafka broker addresses ($KAFKA_ADDRESSES)
         --kafkaTopic="SmartlogicConcept"                Kafka topic to send messages to ($KAFKA_TOPIC)
+        --kafkaClusterArn=""                            Kafka cluster ARN used by the producer for maintenance monitoring ($KAFKA_CLUSTER_ARN)
         --smartlogicBaseURL=""                          Base URL for the Smartlogic instance ($SMARTLOGIC_BASE_URL)
         --smartlogicModel=""                            Smartlogic model to read from ($SMARTLOGIC_MODEL)
         --smartlogicAPIKey=""                           Smartlogic model to read from ($SMARTLOGIC_API_KEY)
