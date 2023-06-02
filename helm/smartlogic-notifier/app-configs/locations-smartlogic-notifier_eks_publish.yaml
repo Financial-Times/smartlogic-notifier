@@ -4,8 +4,7 @@ service:
   name: locations-smartlogic-notifier
   accountName: eksctl-smartlogic-notifier-serviceaccount
 config:
-  smartlogicModelKey: "smartlogic.locations.model"
+  smartlogicModelKey: "SMARTLOGIC_LOCATIONS_MODEL"
   logLevel: INFO
-  kafkaTopic: SmartlogicConcept
   conceptUriPrefix: "http://www.ft.com/ontology/managedlocation/"
   smartlogicHealthcheckConcept: "822e3c99-afc6-3c55-b497-2255ac546f35"

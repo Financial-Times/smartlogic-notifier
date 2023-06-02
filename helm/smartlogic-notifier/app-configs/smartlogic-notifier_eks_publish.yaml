@@ -4,8 +4,7 @@ service:
   name: smartlogic-notifier
   accountName: eksctl-smartlogic-notifier-serviceaccount
 config:
-  smartlogicModelKey: "smartlogic.model"
+  smartlogicModelKey: "SMARTLOGIC_MODEL"
   logLevel: INFO
-  kafkaTopic: SmartlogicConcept
   conceptUriPrefix: "http://www.ft.com/thing/"
   smartlogicHealthcheckConcept: "b1a492d9-dcfe-43f8-8072-17b4618a78fd"
