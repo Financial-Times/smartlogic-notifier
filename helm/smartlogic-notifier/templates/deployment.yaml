@@ -47,7 +47,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: global-secrets
-              key: smartlogic.api-key
+              key: SMARTLOGIC_API_KEY
         - name: SMARTLOGIC_TIMEOUT
           value: {{ .Values.config.smartlogicTimeout }}
         - name: SMARTLOGIC_HEALTHCHECK_CONCEPT
