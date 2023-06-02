@@ -50,8 +50,20 @@ spec:
               key: SMARTLOGIC_API_KEY
         - name: SMARTLOGIC_TIMEOUT
           value: {{ .Values.config.smartlogicTimeout }}
+        - name: KAFKA_ADDRESSES
+          valueFrom:
+            configMapKeyRef:
+              name: global-config
+              key: msk.kafka.broker.url
+        - name: KAFKA_CLUSTER_ARN
+          valueFrom:
+            configMapKeyRef:
+              name: global-config
+              key: msk.kafka.cluster.arn
         - name: SMARTLOGIC_HEALTHCHECK_CONCEPT
           value: {{ .Values.config.smartlogicHealthcheckConcept }}
+        - name: KAFKA_TOPIC
+          value: {{ .Values.config.kafkaTopic }}
         - name: CONCEPT_URI_PREFIX
           value: {{ .Values.config.conceptUriPrefix }}
         - name: LOG_LEVEL
