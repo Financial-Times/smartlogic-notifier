@@ -36,18 +36,18 @@ spec:
         - name: SMARTLOGIC_BASE_URL
           valueFrom:
             secretKeyRef:
-              name: global-secrets
-              key: smartlogic.base-url
+              name: doppler-global-secrets
+              key: SMARTLOGIC_BASE_URL
         - name: SMARTLOGIC_MODEL
           valueFrom:
             secretKeyRef:
-              name: global-secrets
+              name: doppler-global-secrets
               key: {{ .Values.config.smartlogicModelKey }}
         - name: SMARTLOGIC_API_KEY
           valueFrom:
             secretKeyRef:
-              name: global-secrets
-              key: smartlogic.api-key
+              name: doppler-global-secrets
+              key: SMARTLOGIC_API_KEY
         - name: SMARTLOGIC_TIMEOUT
           value: {{ .Values.config.smartlogicTimeout }}
         - name: KAFKA_ADDRESSES
