@@ -75,6 +75,13 @@ func (s *Service) ForceNotify(UUIDs []string, transactionID string) error {
 	for _, conceptUUID := range UUIDs {
 		concept, err := s.slClient.GetConcept(conceptUUID)
 		if err != nil {
+			s.log.
+				WithTransactionID(transactionID).
+				WithField("concept_uuid", conceptUUID).
+				WithField("msg", "debug get concept").
+				WithField("errr", err).
+				Error(err)
+
 			errorMap[conceptUUID] = err
 			continue
 		}
@@ -91,9 +98,23 @@ func (s *Service) ForceNotify(UUIDs []string, transactionID string) error {
 			Info("Sending message to Kafka")
 		err = s.producer.SendMessage(message)
 		if err != nil {
+			s.log.
+				WithTransactionID(transactionID).
+				WithField("concept_transaction_id", newTransactionID).
+				WithField("concept_uuid", conceptUUID).
+				WithField("errr", err).
+				WithField("msg", "debug send message").
+				Error(err)
+
 			errorMap[conceptUUID] = err
 		}
 	}
+
+	s.log.
+		WithTransactionID(transactionID).
+		WithField("errr", errorMap).
+		WithField("msg", "debug force notify").
+		Error("test")
 
 	if len(errorMap) > 0 {
 		errorMsg := fmt.Sprintf("There was an error with %d concept ingestions", len(errorMap))

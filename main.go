@@ -119,6 +119,8 @@ func main() {
 	log := logger.NewUPPLogger(*appName, *logLevel)
 	log.Infof("[Startup] %s is starting", *appSystemCode)
 
+	log.Infof("Log level %s", *logLevel)
+
 	smartlogicHealthCacheDuration, err := time.ParseDuration(*smartlogicHealthCacheFor)
 	if err != nil {
 		log.Warnf("Health check success cache duration %s could not be parsed", *smartlogicHealthCacheFor)
